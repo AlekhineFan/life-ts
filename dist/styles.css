@@ -1,0 +1,13 @@
+.table-cell {
+  width: 10px;
+  height: 10px;
+}
+
+.cell-living {
+  background-color: rgb(5, 5, 4);
+}
+
+.cell-dead {
+  background-color:bisque
+}
+
