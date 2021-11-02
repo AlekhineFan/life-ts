@@ -22,7 +22,7 @@ class Cell {
   }
 
   decideInitialState(): CellState {
-    const rnd = Math.floor(Math.random() * 10);
+    const rnd = Math.floor(Math.random() * 8);
     return rnd === 5? CellState.Live : CellState.Dead;
   }
 
@@ -84,23 +84,41 @@ class TableManager {
 
     if (positionY - 1 > 0) {
       neighbours.push(this.cellRows[positionX][positionY - 1]);
+      if (positionX - 1 > 0) {
+        neighbours.push(this.cellRows[positionX - 1][positionY - 1]);
+      }
     }
     if (positionX - 1 > 0) {
       neighbours.push(this.cellRows[positionX - 1][positionY]);
+      if (positionY + 1 < 49) {
+        neighbours.push(this.cellRows[positionX - 1][positionY + 1]);
+      }
     }
     if (positionY + 1 < 49) {
       neighbours.push(this.cellRows[positionX][positionY + 1]);
+      if (positionX + 1 < 49) {
+        neighbours.push(this.cellRows[positionX + 1][positionY + 1]);
+      }
     }
     if (positionX + 1 < 49) {
       neighbours.push(this.cellRows[positionX + 1][positionY]);
+      if (positionY - 1 > 0) {
+        neighbours.push(this.cellRows[positionX + 1][positionY - 1]);
+      }
     }
 
     const numberOfConnections = neighbours.filter(cell => cell.currentState === CellState.Live).length;
 
-    if(numberOfConnections < 2 || numberOfConnections > 3) {
-      cell.nextState = CellState.Dead;
+    if (cell.currentState === CellState.Live) {
+      if(numberOfConnections === 2 || numberOfConnections === 3) {
+        cell.nextState = CellState.Live;
+      } else {
+        cell.nextState = CellState.Dead;
+      }
     } else {
-      cell.nextState = CellState.Live;
+      if (numberOfConnections === 3) {
+        cell.nextState = CellState.Live;
+      }
     }
   }
 
