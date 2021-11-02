@@ -90,17 +90,17 @@ class TableManager {
     }
     if (positionX - 1 > 0) {
       neighbours.push(this.cellRows[positionX - 1][positionY]);
-      if (positionY + 1 < 49) {
+      if (positionY + 1 < 64) {
         neighbours.push(this.cellRows[positionX - 1][positionY + 1]);
       }
     }
-    if (positionY + 1 < 49) {
+    if (positionY + 1 < 64) {
       neighbours.push(this.cellRows[positionX][positionY + 1]);
-      if (positionX + 1 < 49) {
+      if (positionX + 1 < 64) {
         neighbours.push(this.cellRows[positionX + 1][positionY + 1]);
       }
     }
-    if (positionX + 1 < 49) {
+    if (positionX + 1 < 64) {
       neighbours.push(this.cellRows[positionX + 1][positionY]);
       if (positionY - 1 > 0) {
         neighbours.push(this.cellRows[positionX + 1][positionY - 1]);
@@ -143,7 +143,7 @@ class TableManager {
     setInterval(() => {
       this.getStatesSetColors();
       this.setNextStateForTable();
-    }, 500);
+    }, 400);
   }
 }
 
@@ -186,7 +186,7 @@ function setInitialAttribute(tableCell: HTMLTableDataCellElement): void {
   tableCell.classList.add('table-cell');
 }
 
-const tableCells = setupTable(50);
-const cellRepresentations = createCells(50);
+const tableCells = setupTable(65);
+const cellRepresentations = createCells(65);
 
 const manager = new TableManager(cellRepresentations, tableCells);

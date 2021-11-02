@@ -67,17 +67,17 @@ var TableManager = /** @class */ (function () {
         }
         if (positionX - 1 > 0) {
             neighbours.push(this.cellRows[positionX - 1][positionY]);
-            if (positionY + 1 < 49) {
+            if (positionY + 1 < 64) {
                 neighbours.push(this.cellRows[positionX - 1][positionY + 1]);
             }
         }
-        if (positionY + 1 < 49) {
+        if (positionY + 1 < 64) {
             neighbours.push(this.cellRows[positionX][positionY + 1]);
-            if (positionX + 1 < 49) {
+            if (positionX + 1 < 64) {
                 neighbours.push(this.cellRows[positionX + 1][positionY + 1]);
             }
         }
-        if (positionX + 1 < 49) {
+        if (positionX + 1 < 64) {
             neighbours.push(this.cellRows[positionX + 1][positionY]);
             if (positionY - 1 > 0) {
                 neighbours.push(this.cellRows[positionX + 1][positionY - 1]);
@@ -119,7 +119,7 @@ var TableManager = /** @class */ (function () {
         setInterval(function () {
             _this.getStatesSetColors();
             _this.setNextStateForTable();
-        }, 500);
+        }, 400);
     };
     return TableManager;
 }());
@@ -160,6 +160,6 @@ function setupTable(size) {
 function setInitialAttribute(tableCell) {
     tableCell.classList.add('table-cell');
 }
-var tableCells = setupTable(50);
-var cellRepresentations = createCells(50);
+var tableCells = setupTable(65);
+var cellRepresentations = createCells(65);
 var manager = new TableManager(cellRepresentations, tableCells);
