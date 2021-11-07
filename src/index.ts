@@ -16,12 +16,12 @@ interface Cell {
 
 class Cell {
   constructor(coordinates: Coordinates) {
-    this.currentState = this.decideInitialState();
+    this.currentState = this.getRandomInitialState();
     this.nextState = CellState.Dead;
     this.coordinates = coordinates;
   }
 
-  decideInitialState(): CellState {
+  getRandomInitialState(): CellState {
     const rnd = Math.floor(Math.random() * 8);
     return rnd === 5? CellState.Live : CellState.Dead;
   }
@@ -44,16 +44,59 @@ class CellDictionary {
 }
 
 interface TableManager {
+  rowSize: number;
   cellRows: Array<Array<Cell>>;
   htmlCells: CellDictionary;
+  timer: number | undefined;
 }
 
 class TableManager {
-  constructor(cells: Array<Array<Cell>>, htmlCells: CellDictionary) {
-    this.cellRows = cells;
-    this.htmlCells = htmlCells;
+  constructor(rowSize: number) {
+    this.rowSize = rowSize;
+    this.cellRows = this.createCells(this.rowSize);
+    this.htmlCells = this.createHtmlCellDictionary(this.rowSize);
 
+    this.timer = undefined;
     this.start();
+  }
+
+  createCells(size: number): Array<Array<Cell>> {
+    const cellRows = [];
+    for(let i = 0; i < size; i++) {
+      const cells = [];
+      for(let j = 0; j < size; j++) {
+        cells.push(new Cell({
+          positionX: i,
+          positionY: j,
+        }));
+      }
+      cellRows.push(cells);
+    }
+    return cellRows;
+  }
+
+  createHtmlCellDictionary(size: number): CellDictionary {
+    const tableCells = new CellDictionary();
+    const table = document.createElement('table');
+    for(let i = 0; i < size; i ++) {
+      const row = document.createElement('tr');
+      for(let j = 0; j < size; j++) {
+        const data = document.createElement('td');
+        data.setAttribute('row', i.toString());
+        data.setAttribute('col', j.toString());
+        this.setInitialAttribute(data);
+        row.appendChild(data);
+        const key = `${i.toString()}:${j.toString()}`;
+        tableCells.Search[key] = data;
+      }
+      table.appendChild(row);
+    }
+    document.querySelector('#main-table')?.append(table);
+    return tableCells;
+  }
+
+  setInitialAttribute(tableCell: HTMLTableDataCellElement): void {
+    tableCell.classList.add('table-cell');
   }
 
   getStatesSetColors(): void {
@@ -81,6 +124,7 @@ class TableManager {
   getNeigboursAndSetNextState(cell: Cell): void {
     const { positionX, positionY } = cell.coordinates;
     const neighbours = [];
+    const edge = this.rowSize - 1;
 
     if (positionY - 1 > 0) {
       neighbours.push(this.cellRows[positionX][positionY - 1]);
@@ -90,33 +134,37 @@ class TableManager {
     }
     if (positionX - 1 > 0) {
       neighbours.push(this.cellRows[positionX - 1][positionY]);
-      if (positionY + 1 < 64) {
+      if (positionY + 1 < edge) {
         neighbours.push(this.cellRows[positionX - 1][positionY + 1]);
       }
     }
-    if (positionY + 1 < 64) {
+    if (positionY + 1 < edge) {
       neighbours.push(this.cellRows[positionX][positionY + 1]);
-      if (positionX + 1 < 64) {
+      if (positionX + 1 < edge) {
         neighbours.push(this.cellRows[positionX + 1][positionY + 1]);
       }
     }
-    if (positionX + 1 < 64) {
+    if (positionX + 1 < edge) {
       neighbours.push(this.cellRows[positionX + 1][positionY]);
       if (positionY - 1 > 0) {
         neighbours.push(this.cellRows[positionX + 1][positionY - 1]);
       }
     }
 
-    const numberOfConnections = neighbours.filter(cell => cell.currentState === CellState.Live).length;
+    const connectionsWithLiveCells = neighbours.filter(cell => cell.currentState === CellState.Live).length;
 
+    this.setNextStateForCell(connectionsWithLiveCells, cell);
+  }
+
+  setNextStateForCell(connectionsWithLiveCells: number, cell: Cell): void {
     if (cell.currentState === CellState.Live) {
-      if(numberOfConnections === 2 || numberOfConnections === 3) {
+      if(connectionsWithLiveCells === 2 || connectionsWithLiveCells === 3) {
         cell.nextState = CellState.Live;
       } else {
         cell.nextState = CellState.Dead;
       }
     } else {
-      if (numberOfConnections === 3) {
+      if (connectionsWithLiveCells === 3) {
         cell.nextState = CellState.Live;
       }
     }
@@ -140,53 +188,15 @@ class TableManager {
   }
 
   start(): void {
-    setInterval(() => {
+    this.timer = setInterval(() => {
       this.getStatesSetColors();
       this.setNextStateForTable();
     }, 400);
   }
-}
 
-function createCells(size: number): Array<Array<Cell>> {
-  const cellRows = [];
-  for(let i = 0; i < size; i++) {
-    const cells = [];
-    for(let j = 0; j < size; j++) {
-      cells.push(new Cell({
-        positionX: i,
-        positionY: j,
-      }));
-    }
-    cellRows.push(cells);
+  pause(): void {
+    clearInterval(this.timer);
   }
-  return cellRows;
 }
 
-function setupTable(size: number): CellDictionary {
-  const tableCells = new CellDictionary();
-  const table = document.createElement('table');
-  for(let i = 0; i < size; i ++) {
-    const row = document.createElement('tr');
-    for(let j = 0; j < size; j++) {
-      const data = document.createElement('td');
-      data.setAttribute('row', i.toString());
-      data.setAttribute('col', j.toString());
-      setInitialAttribute(data);
-      row.appendChild(data);
-      const key = `${i.toString()}:${j.toString()}`;
-      tableCells.Search[key] = data;
-    }
-    table.appendChild(row);
-  }
-  document.querySelector('#main-table')?.append(table);
-  return tableCells;
-}
-
-function setInitialAttribute(tableCell: HTMLTableDataCellElement): void {
-  tableCell.classList.add('table-cell');
-}
-
-const tableCells = setupTable(65);
-const cellRepresentations = createCells(65);
-
-const manager = new TableManager(cellRepresentations, tableCells);
+const manager = new TableManager(170);
